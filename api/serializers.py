@@ -48,6 +48,8 @@ class WeeklyAmountSerializer(ModelSerializer):
         fields = ['id', 'amount', 'selected', 'week_index',
                   'date_selected']
 
+# TODO fix that only users can save to their list
+
 
 class SavingPlanSerializer(ModelSerializer):
     amount_list = WeeklyAmountSerializer(many=True)

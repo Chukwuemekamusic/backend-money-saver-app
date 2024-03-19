@@ -1,14 +1,16 @@
 # from django.shortcuts import render
 from django.http import Http404
+from django.db.models import Max
 from rest_framework.generics import (
-    CreateAPIView, ListAPIView, ListCreateAPIView, UpdateAPIView,
+    CreateAPIView, ListAPIView, RetrieveAPIView, UpdateAPIView,
     GenericAPIView, RetrieveUpdateDestroyAPIView)
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from .serializers import (
     CustomUserSerializer, SavingPlanSerializer, WeeklyAmountSerializer,
     LoginUserSerializer)
 
-# from rest_framework.views import APIView
+from rest_framework import status
+from rest_framework.views import APIView
 from rest_framework.response import Response
 # from rest_framework import status
 # from rest_framework import mixins
@@ -62,7 +64,27 @@ class LoginAPI(GenericAPIView):
             "token": AuthToken.objects.create(user)[1]
         })
 
-# class GetUserView(APIView):
+
+class GetUserView(RetrieveAPIView):
+    serializer_class = CustomUserSerializer
+    permission_classes = [IsAuthenticated]
+    queryset = CustomUser.objects.all()
+
+    def get_object(self):
+        return self.request.user
+
+
+# class LogoutUserView(KnoxLogoutView):
+#     authentication_classes = [TokenAuthentication]
+#     permission_classes = [IsAuthenticated]
+
+class LogoutUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        # Perform logout actions
+        request.auth.delete()  # Delete the user's token
+        return Response({"detail": "Successfully logged out."}, status=status.HTTP_200_OK)
 
 
 class UserSavingPlanListView(ListAPIView):
@@ -110,6 +132,33 @@ class WeeklyAmountUpdateView(UpdateAPIView):
     queryset = WeeklyAmount.objects.all()
     serializer_class = WeeklyAmountSerializer
     permission_classes = [IsAuthenticated]
+
+    # def get_object(self):
+    #     weekly_amount_id = self.kwargs('pk')
+    #     user = self.request.user
+    #     data = self.queryset.filter(id=weekly_amount_id, saving_plan__user=user)
+    #     print(data)
+    #     return data
+
+    # TODO will this still work with queryset instead of WeeklyAmounts
+    def perform_update(self, serializer):
+        instance = serializer.instance
+        data = self.get_queryset().filter(
+            saving_plan=instance.saving_plan)
+        max_week_index = data.aggregate(Max('week_index', default=0))
+        latest_week_index = max_week_index['week_index__max']
+
+        if latest_week_index != 0:
+            instance.week_index = latest_week_index + 1
+        else:
+            instance.week_index = 1
+        # print(data)
+        # print()
+        # print(type(max_week_index['week_index__max']))
+        # print(instance.week_index)
+        serializer.save()
+
+        # return super().perform_update(serializer)
 
     # def get_object(self):
     #     saving_plan_id = self.kwargs['saving_plan_id']

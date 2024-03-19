@@ -27,4 +27,4 @@ class WeeklyAmount(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     selected = models.BooleanField(default=False)
     week_index = models.IntegerField(default=0)
-    date_selected = models.DateField()
+    date_selected = models.DateField(null=True, blank=True)
