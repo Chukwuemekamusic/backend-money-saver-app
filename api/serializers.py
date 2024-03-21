@@ -43,6 +43,16 @@ class LoginUserSerializer(serializers.Serializer):
 
 
 class WeeklyAmountSerializer(ModelSerializer):
+    # saving_plan = serializers.PrimaryKeyRelatedField(queryset=SavingPlan.objects.all(), write_only=True)
+    saving_plan = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = WeeklyAmount
+        fields = ['id', 'amount', 'selected', 'week_index',
+                  'date_selected', 'saving_plan']
+
+
+class SaveWeeklyAmountSerializer(ModelSerializer):
     class Meta:
         model = WeeklyAmount
         fields = ['id', 'amount', 'selected', 'week_index',

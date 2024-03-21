@@ -28,6 +28,8 @@ from knox.views import (LoginView as KnoxLoginView,
 from knox.auth import TokenAuthentication
 from knox.models import AuthToken
 
+from rest_framework.exceptions import PermissionDenied
+
 
 class UserCreateView(CreateAPIView):
     serializer_class = CustomUserSerializer
@@ -133,12 +135,16 @@ class WeeklyAmountUpdateView(UpdateAPIView):
     serializer_class = WeeklyAmountSerializer
     permission_classes = [IsAuthenticated]
 
-    # def get_object(self):
-    #     weekly_amount_id = self.kwargs('pk')
-    #     user = self.request.user
-    #     data = self.queryset.filter(id=weekly_amount_id, saving_plan__user=user)
-    #     print(data)
-    #     return data
+    def get_object(self):
+        queryset = self.filter_queryset(self.get_queryset())
+        obj = queryset.filter(pk=self.kwargs['pk']).first()
+
+        # Check if the associated SavingPlan belongs to the current user
+        if obj.saving_plan.user != self.request.user:
+            raise PermissionDenied(
+                "You do not have permission to perform this action.")
+
+        return obj
 
     # TODO will this still work with queryset instead of WeeklyAmounts
     def perform_update(self, serializer):
@@ -152,11 +158,12 @@ class WeeklyAmountUpdateView(UpdateAPIView):
             instance.week_index = latest_week_index + 1
         else:
             instance.week_index = 1
+
+        serializer.save()
         # print(data)
         # print()
         # print(type(max_week_index['week_index__max']))
         # print(instance.week_index)
-        serializer.save()
 
         # return super().perform_update(serializer)
 
