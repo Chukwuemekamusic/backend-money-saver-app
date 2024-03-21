@@ -22,6 +22,7 @@ from .models import WeeklyAmount, CustomUser, SavingPlan
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import login
+from django.utils import timezone
 
 from knox.views import (LoginView as KnoxLoginView,
                         LogoutView as KnoxLogoutView)
@@ -158,6 +159,8 @@ class WeeklyAmountUpdateView(UpdateAPIView):
             instance.week_index = latest_week_index + 1
         else:
             instance.week_index = 1
+        
+        instance.date_selected = timezone.now()
 
         serializer.save()
         # print(data)
