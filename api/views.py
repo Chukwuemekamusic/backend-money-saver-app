@@ -94,23 +94,29 @@ class UserSavingPlanListView(ListAPIView):
     serializer_class = SavingPlanSerializer
     permission_classes = [IsAuthenticated]
 
-    def validate(self, data):
-        # Access the request object from the serializer's context
-        request = self.context.get('request')
+    # def validate(self, data):
+    #     # Access the request object from the serializer's context
+    #     request = self.context.get('request')
+    #     data['user'] = request.user
 
-        # Include request.user as user in the submitted data
-        data['user'] = request.user
-
-        return data
+    #     return data
 
     def get_queryset(self):
         queryset = SavingPlan.objects.filter(user=self.request.user)
         return queryset
 
     def perform_create(self, serializer):
-        serializer.validated_data['user'] = self.request.user
+        # serializer.validated_data['user'] = self.request.user
         serializer.save()
         # serializer.save(user=self.request.user)
+
+    #  def list(self, request, *args, **kwargs):
+    #     queryset = self.get_queryset()
+    #     serializer = self.get_serializer(queryset, many=True)
+    #     for saving_plan in serializer.data:
+    #         saved_amount = sum(amount['amount'] for amount in saving_plan['amount_list'] if amount['selected'])
+    #         saving_plan['saved_amount'] = saved_amount
+    #     return Response(serializer.data)
 
 
 class SavingPlanCreateView(CreateAPIView):

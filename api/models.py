@@ -20,6 +20,15 @@ class SavingPlan(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date_created = models.DateTimeField(auto_now_add=True)
 
+    @property
+    def total_saved_amount(self):
+        return self.amount_list.filter(selected=True).aggregate(models.Sum('amount'))['amount__sum'] or 0
+    
+    
+    # def selected_weekly_amounts(self):
+    #     return self.amount_list.filter(selected=True)
+
+
 
 class WeeklyAmount(models.Model):
     saving_plan = models.ForeignKey(

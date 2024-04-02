@@ -42,16 +42,6 @@ class LoginUserSerializer(serializers.Serializer):
         return user
 
 
-class WeeklyAmountSerializer(ModelSerializer):
-    # saving_plan = serializers.PrimaryKeyRelatedField(queryset=SavingPlan.objects.all(), write_only=True)
-    saving_plan = serializers.PrimaryKeyRelatedField(read_only=True)
-
-    class Meta:
-        model = WeeklyAmount
-        fields = ['id', 'amount', 'selected', 'week_index',
-                  'date_selected', 'saving_plan']
-
-
 class SaveWeeklyAmountSerializer(ModelSerializer):
     class Meta:
         model = WeeklyAmount
@@ -61,13 +51,31 @@ class SaveWeeklyAmountSerializer(ModelSerializer):
 # TODO fix that only users can save to their list
 
 
+class WeeklyAmountSerializer(ModelSerializer):
+    # saving_plan = serializers.PrimaryKeyRelatedField(queryset=SavingPlan.objects.all(), write_only=True)
+    saving_plan = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = WeeklyAmount
+        fields = ['id', 'amount', 'selected', 'week_index',
+                  'date_selected', 'saving_plan']
+
+def get_amount_list(saving_plan):
+    """
+    Helper function to fetch the amount_list associated with the SavingPlan.
+    """
+    amount_list = WeeklyAmount.objects.filter(saving_plan=saving_plan)
+    serializer = WeeklyAmountSerializer(amount_list, many=True)
+    return serializer.data
+
 class SavingPlanSerializer(ModelSerializer):
     amount_list = WeeklyAmountSerializer(many=True)
+    # selected_weekly_amount = serializers.SerializerMethodField()
 
     class Meta:
         model = SavingPlan
         fields = ['id', 'user', 'savings_name',
-                  'amount', 'date_created', 'amount_list']
+                  'amount', 'date_created', 'amount_list', 'total_saved_amount']
 
     def create(self, validated_data):
         amount_list_data = validated_data.pop('amount_list')
@@ -77,5 +85,8 @@ class SavingPlanSerializer(ModelSerializer):
         for amount_data in amount_list_data:
             WeeklyAmount.objects.create(saving_plan=saving_plan, **amount_data)
         return saving_plan
-
+    
+    # def get_selected_weekly_amounts(self, obj):
+    #     return obj.selected_weekly_amounts()
+        
 # update weeklyAmount
