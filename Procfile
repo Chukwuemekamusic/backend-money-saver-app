@@ -1,1 +1,1 @@
-web: gunicorn moneySaver.wsgi
+web: python manage.py migrate && gunicorn moneySaver.wsgi
