@@ -1,0 +1,1 @@
+web: python manage.py migrate && gunicorn backend-money-saver-app.wsgi
