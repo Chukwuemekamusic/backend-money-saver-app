@@ -19,6 +19,7 @@ class SavingPlan(models.Model):
     savings_name = models.CharField(max_length=255)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date_created = models.DateTimeField(auto_now_add=True)
+    number_of_weeks = models.IntegerField(default=52)
 
     @property
     def total_saved_amount(self):
