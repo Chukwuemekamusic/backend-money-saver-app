@@ -75,7 +75,7 @@ class SavingPlanSerializer(ModelSerializer):
     class Meta:
         model = SavingPlan
         fields = ['id', 'user', 'savings_name',
-                  'amount', 'date_created', 'amount_list', 'total_saved_amount']
+                  'amount', 'date_created', 'amount_list', 'number_of_weeks', 'total_saved_amount']
 
     def create(self, validated_data):
         amount_list_data = validated_data.pop('amount_list')
