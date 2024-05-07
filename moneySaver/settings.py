@@ -95,7 +95,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'money_saver_app',
-        'USER': 'emeka',
+        'USER': env('DB_USER'),
         'PASSWORD': env('MY_PASSWORD'),
         'HOST': 'localhost',
         'PORT': '5432',
@@ -106,7 +106,7 @@ DATABASES = {
     # }
 }
 
-POSTGRES_LOCALLY = True
+POSTGRES_LOCALLY = False
 if ENVIRONMENT == 'production' or POSTGRES_LOCALLY == False:
     DATABASES['default'] = dj_database_url.parse(env('DATABASE_URL'))
 
