@@ -1,21 +1,21 @@
 # from google_auth_oauthlib.flow import Flow
 from oauth2client import client
-import os
-import dotenv
+# import os
+# import dotenv
 import requests
 import urllib
 import jwt
 from .models import CustomUser
+from moneySaver import settings
 
-
-dotenv.load_dotenv()
+# dotenv.load_dotenv()
 
 
 
 def get_id_token1(code):
     flow = client.OAuth2WebServerFlow(
-        client_id=os.getenv('GOOGLE_OAUTH2_CLIENT_ID'),
-        client_secret=os.getenv('GOOGLE_OAUTH2_CLIENT_SECRET'),
+        client_id=settings.GOOGLE_OAUTH2_CLIENT_ID,
+        client_secret=settings.GOOGLE_OAUTH2_CLIENT_SECRET,
         scope='https://www.googleapis.com/auth/userinfo.email',
         redirect_uri='http://localhost:8000/api/user/login/google/'
     )
@@ -36,8 +36,8 @@ def get_id_token2(code):
     
 def get_id_token_alt2(code):
     token_url = 'https://oauth2.googleapis.com/token'
-    client_id = os.getenv('GOOGLE_OAUTH2_CLIENT_ID')
-    client_secret = os.getenv('GOOGLE_OAUTH2_CLIENT_SECRET')
+    client_id = settings.GOOGLE_OAUTH2_CLIENT_ID
+    client_secret = settings.GOOGLE_OAUTH2_CLIENT_SECRET
     data = {
         'code': code,
         'client_id': client_id,
@@ -60,8 +60,8 @@ def get_id_token_alt2(code):
 
 def get_id_token_alt(code):
     token_url = 'https://oauth2.googleapis.com/token'
-    client_id = os.getenv('GOOGLE_OAUTH2_CLIENT_ID')
-    client_secret = os.getenv('GOOGLE_OAUTH2_CLIENT_SECRET')
+    client_id = settings.GOOGLE_OAUTH2_CLIENT_ID
+    client_secret = settings.GOOGLE_OAUTH2_CLIENT_SECRET
     data = {
         'code': code,
         'client_id': client_id,
