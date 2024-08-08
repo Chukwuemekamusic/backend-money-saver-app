@@ -138,7 +138,7 @@ class LogoutUserView(APIView):
 class UserSavingPlanListView(ListAPIView):
     serializer_class = SavingPlanSerializer
     permission_classes = [IsAuthenticated]
-
+    
     # def validate(self, data):
     #     # Access the request object from the serializer's context
     #     request = self.context.get('request')
