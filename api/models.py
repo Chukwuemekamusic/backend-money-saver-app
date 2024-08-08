@@ -12,7 +12,7 @@ class CustomUser(AbstractUser):
         ('email', 'Email'),
         ('google', 'Google'),
     )
-    # registration_method = models.CharField(max_length=10, choices=REGISTRATION_CHOICES, default='google')
+    registration_method = models.CharField(max_length=10, choices=REGISTRATION_CHOICES, default='google')
 
 
     def __str__(self) -> str:
