@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (
     UserCreateView, UserSavingPlanListView, WeeklyAmountUpdateView,
     LoginAPI, UserSavingPlanDetailView, SavingPlanCreateView, GetUserView,
-    LogoutUserView)
+    LogoutUserView, GoogleLoginView)
 
 
 urlpatterns = [
@@ -18,4 +18,7 @@ urlpatterns = [
          WeeklyAmountUpdateView.as_view(), name='weeklyamount-update'),
     path('user/savingplan/<int:pk>/', UserSavingPlanDetailView.as_view(),
          name='user-savingplan'),
+    # Google OAuth2
+    path('user/login/google/', GoogleLoginView.as_view(), name='google-login'),
+    path('user/login/google/callback/', GoogleLoginView.as_view(), name='google-callback'),
 ]

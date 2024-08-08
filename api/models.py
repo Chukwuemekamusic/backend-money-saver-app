@@ -4,13 +4,19 @@ from django.contrib.auth.models import AbstractUser
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True, blank=False)
-    username = models.CharField(max_length=150, default='ignore')
-
+    username = models.CharField(max_length=150, unique=True)  # Ensure username is unique
+    
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['username']  # Add username to required fields
+    REGISTRATION_CHOICES = (
+        ('email', 'Email'),
+        ('google', 'Google'),
+    )
+    # registration_method = models.CharField(max_length=10, choices=REGISTRATION_CHOICES, default='google')
+
 
     def __str__(self) -> str:
-        return self.first_name
+        return self.email
 
 
 class SavingPlan(models.Model):

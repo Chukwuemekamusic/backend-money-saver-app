@@ -4,6 +4,10 @@ from rest_framework.serializers import (ModelSerializer)
 from django.contrib.auth import authenticate
 
 
+class AuthSerializer(serializers.Serializer):
+    code = serializers.CharField(required=False)
+    error = serializers.CharField(required=False)
+
 class CustomUserSerializer(ModelSerializer):
     class Meta:
         model = CustomUser
