@@ -6,13 +6,13 @@ import requests
 import urllib
 import jwt
 from .models import CustomUser
-from moneySaver import settings
+from django.conf import settings
 
 # dotenv.load_dotenv()
 
 
 
-def get_id_token1(code):
+def get_id_token2(code):
     flow = client.OAuth2WebServerFlow(
         client_id=settings.GOOGLE_OAUTH2_CLIENT_ID,
         client_secret=settings.GOOGLE_OAUTH2_CLIENT_SECRET,
@@ -21,7 +21,7 @@ def get_id_token1(code):
     )
     return flow.step1_get_authorize_url()
 
-def get_id_token2(code):
+def get_id_token(code):
     try:
         credentials = client.credentials_from_clientsecrets_and_code(
             'client_secret.json',

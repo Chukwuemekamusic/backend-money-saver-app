@@ -13,6 +13,8 @@ GOOGLE_OAUTH2_CLIENT_SECRET = env('GOOGLE_OAUTH2_CLIENT_SECRET', default='')
 BASE_APP_URL = env('BASE_APP_URL', default='')
 BASE_API_URL = env('BASE_API_URL', default='')
 
+print(f"GOOGLE_OAUTH2_CLIENT_ID: {GOOGLE_OAUTH2_CLIENT_ID}")
+print(f"GOOGLE_OAUTH2_CLIENT_SECRET: {GOOGLE_OAUTH2_CLIENT_SECRET}")
 
 ENVIRONMENT = env('ENVIRONMENT', default='production')
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -114,7 +116,7 @@ DATABASES = {
     # }
 }
 
-POSTGRES_LOCALLY = False
+POSTGRES_LOCALLY = True
 if ENVIRONMENT == 'production' or POSTGRES_LOCALLY == False:
     DATABASES['default'] = dj_database_url.parse(env('DATABASE_URL'))
 

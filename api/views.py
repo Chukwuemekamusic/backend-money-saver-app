@@ -33,7 +33,7 @@ from knox.auth import TokenAuthentication
 from knox.models import AuthToken
 
 from rest_framework.exceptions import PermissionDenied
-from .utils import get_id_token2, get_id_token_alt
+from .utils import get_id_token, get_id_token_alt
 from .services import get_user_data
 from .utils import authentication_or_create_user
 
@@ -45,7 +45,13 @@ class GoogleLoginView(APIView):
             code = request.data['code']
             # id_token = get_id_token2(code)
             id_token = get_id_token_alt(code)
+            print('id_token', id_token)
+            if id_token is None:
+                return Response({"error": "Failed to retrieve ID token"}, status=status.HTTP_400_BAD_REQUEST)
+            
             user_email = id_token['email']
+            if user_email is None:
+                return Response({"error": "Email not found in ID token"}, status=status.HTTP_400_BAD_REQUEST)
             first_name = id_token.get('given_name', '')
             last_name = id_token.get('family_name', '')
             user = authentication_or_create_user(user_email, first_name, last_name)
@@ -62,20 +68,20 @@ class GoogleLoginView(APIView):
             return Response({"message": "Google login failed"})
 
 
-class GoogleLoginView2(APIView):
+# class GoogleLoginView2(APIView):
 
-    def get(self, request, *args, **kwargs):
-        auth_serializer = AuthSerializer(data=request.GET)
-        auth_serializer.is_valid(raise_exception=True)
+#     def get(self, request, *args, **kwargs):
+#         auth_serializer = AuthSerializer(data=request.GET)
+#         auth_serializer.is_valid(raise_exception=True)
         
-        validated_data = auth_serializer.validated_data
-        user_data = get_user_data(validated_data)
+#         validated_data = auth_serializer.validated_data
+#         user_data = get_user_data(validated_data)
         
-        user = CustomUser.objects.get(email=user_data['email'])
-        login(request, user)
-        print(user)
+#         user = CustomUser.objects.get(email=user_data['email'])
+#         login(request, user)
+#         print(user)
 
-        return redirect(settings.BASE_APP_URL)
+#         return redirect(settings.BASE_APP_URL)
 
 class UserCreateView(CreateAPIView):
     serializer_class = CustomUserSerializer
