@@ -1,22 +1,24 @@
 from pathlib import Path
 from datetime import timedelta
 import os
-from environ import Env 
+# from environ import Env 
+from dotenv import load_dotenv
 import dj_database_url
 
-env = Env()
-Env.read_env()
+load_dotenv()
+# env = Env()
+# Env.read_env()
 
-GOOGLE_OAUTH2_PROJECT_ID = env('GOOGLE_OAUTH2_PROJECT_ID', default='')
-GOOGLE_OAUTH2_CLIENT_ID = env('GOOGLE_OAUTH2_CLIENT_ID', default='')
-GOOGLE_OAUTH2_CLIENT_SECRET = env('GOOGLE_OAUTH2_CLIENT_SECRET', default='')
-BASE_APP_URL = env('BASE_APP_URL', default='')
-BASE_API_URL = env('BASE_API_URL', default='')
+GOOGLE_OAUTH2_PROJECT_ID = os.getenv('GOOGLE_OAUTH2_PROJECT_ID', default='')
+GOOGLE_OAUTH2_CLIENT_ID = os.getenv('GOOGLE_OAUTH2_CLIENT_ID', default='')
+GOOGLE_OAUTH2_CLIENT_SECRET = os.getenv('GOOGLE_OAUTH2_CLIENT_SECRET', default='')
+BASE_APP_URL = os.getenv('BASE_APP_URL', default='')
+BASE_API_URL = os.getenv('BASE_API_URL', default='')
 
 print(f"GOOGLE_OAUTH2_CLIENT_ID: {GOOGLE_OAUTH2_CLIENT_ID}")
 print(f"GOOGLE_OAUTH2_CLIENT_SECRET: {GOOGLE_OAUTH2_CLIENT_SECRET}")
 
-ENVIRONMENT = env('ENVIRONMENT', default='production')
+ENVIRONMENT = os.getenv('ENVIRONMENT', default='production')
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -25,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 if ENVIRONMENT == ('development'):
@@ -105,8 +107,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'money_saver_app',
-        'USER': env('DB_USER'),
-        'PASSWORD': env('MY_PASSWORD'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('MY_PASSWORD'),
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -116,9 +118,9 @@ DATABASES = {
     # }
 }
 
-POSTGRES_LOCALLY = True
+POSTGRES_LOCALLY = False
 if ENVIRONMENT == 'production' or POSTGRES_LOCALLY == False:
-    DATABASES['default'] = dj_database_url.parse(env('DATABASE_URL'))
+    DATABASES['default'] = dj_database_url.parse(os.getenv('DATABASE_URL'))
 
 
 # Password validation
