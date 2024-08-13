@@ -4,6 +4,9 @@ import os
 # from environ import Env 
 from dotenv import load_dotenv
 import dj_database_url
+# from dotenv import load_dotenv
+
+# load_dotenv()
 
 load_dotenv()
 # env = Env()
@@ -15,8 +18,8 @@ GOOGLE_OAUTH2_CLIENT_SECRET = os.getenv('GOOGLE_OAUTH2_CLIENT_SECRET', default='
 BASE_APP_URL = os.getenv('BASE_APP_URL', default='')
 BASE_API_URL = os.getenv('BASE_API_URL', default='')
 
-print(f"GOOGLE_OAUTH2_CLIENT_ID: {GOOGLE_OAUTH2_CLIENT_ID}")
-print(f"GOOGLE_OAUTH2_CLIENT_SECRET: {GOOGLE_OAUTH2_CLIENT_SECRET}")
+# print(f"GOOGLE_OAUTH2_CLIENT_ID: {GOOGLE_OAUTH2_CLIENT_ID}")
+# print(f"GOOGLE_OAUTH2_CLIENT_SECRET: {GOOGLE_OAUTH2_CLIENT_SECRET}")
 
 ENVIRONMENT = os.getenv('ENVIRONMENT', default='production')
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

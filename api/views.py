@@ -15,12 +15,7 @@ from .serializers import (
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-# from rest_framework import status
-# from rest_framework import mixins
-# from rest_framework.authtoken.models import Token
 
-# from django.contrib.auth import authenticate
-# from rest_framework.authtoken.views import ObtainAuthToken
 from .models import WeeklyAmount, CustomUser, SavingPlan
 
 from django.contrib.auth.mixins import LoginRequiredMixin

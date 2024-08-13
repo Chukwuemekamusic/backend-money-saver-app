@@ -15,10 +15,18 @@ class CustomUserSerializer(ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        username = f"{validated_data['first_name']}_{validated_data['last_name']}"
-        validated_data['username'] = username
+        # Set the username to be the email
+        validated_data['username'] = validated_data['email']
+        
+        # Create the user with the validated data
         user = CustomUser.objects.create_user(**validated_data)
         return user
+
+    # def create(self, validated_data):
+    #     username = f"{validated_data['first_name']}_{validated_data['last_name']}"
+    #     validated_data['username'] = username
+    #     user = CustomUser.objects.create_user(**validated_data)
+    #     return user
 
 
 class LoginUserSerializer(serializers.Serializer):
