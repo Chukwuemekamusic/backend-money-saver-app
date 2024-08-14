@@ -7,6 +7,14 @@ from django.contrib.auth import authenticate
 class AuthSerializer(serializers.Serializer):
     code = serializers.CharField(required=False)
     error = serializers.CharField(required=False)
+    
+class SignupSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(max_length=128, write_only=True)
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'first_name', 'last_name', 'email', 'password']
+        extra_kwargs = {'password': {'write_only': True}}
 
 class CustomUserSerializer(ModelSerializer):
     class Meta:
@@ -21,12 +29,12 @@ class CustomUserSerializer(ModelSerializer):
         # Create the user with the validated data
         user = CustomUser.objects.create_user(**validated_data)
         return user
+    
+    # def validate_email(self, value):
+    #     if CustomUser.objects.filter(email=value).exists():
+    #         raise serializers.ValidationError("This email is already in use.")
+    #     return value
 
-    # def create(self, validated_data):
-    #     username = f"{validated_data['first_name']}_{validated_data['last_name']}"
-    #     validated_data['username'] = username
-    #     user = CustomUser.objects.create_user(**validated_data)
-    #     return user
 
 
 class LoginUserSerializer(serializers.Serializer):

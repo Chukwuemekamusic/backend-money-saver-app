@@ -15,6 +15,7 @@ load_dotenv()
 GOOGLE_OAUTH2_PROJECT_ID = os.getenv('GOOGLE_OAUTH2_PROJECT_ID', default='')
 GOOGLE_OAUTH2_CLIENT_ID = os.getenv('GOOGLE_OAUTH2_CLIENT_ID', default='')
 GOOGLE_OAUTH2_CLIENT_SECRET = os.getenv('GOOGLE_OAUTH2_CLIENT_SECRET', default='')
+BASE_FRONTEND_URL = os.getenv('BASE_FRONTEND_URL', default='')
 BASE_APP_URL = os.getenv('BASE_APP_URL', default='')
 BASE_API_URL = os.getenv('BASE_API_URL', default='')
 
@@ -50,6 +51,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
+    # for allauth
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    # 'allauth.socialaccount.providers.google',
+    "dj_rest_auth",
+    "dj_rest_auth.registration",
+    "rest_framework.authtoken",
+    
+    # end for allauth
 
     'api',
 
@@ -59,6 +72,8 @@ INSTALLED_APPS = [
     'knox',
 
     'drf_yasg',
+    
+    
 
 ]
 
@@ -80,6 +95,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
+    # #TODO: Add the account middleware:
+    # "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = 'moneySaver.urls'
@@ -121,8 +139,8 @@ DATABASES = {
     # }
 }
 
-POSTGRES_LOCALLY = False
-if ENVIRONMENT == 'production' or POSTGRES_LOCALLY == False:
+POSTGRES_LOCALLY = True
+if ENVIRONMENT == 'production' or not POSTGRES_LOCALLY: 
     DATABASES['default'] = dj_database_url.parse(os.getenv('DATABASE_URL'))
 
 
@@ -184,3 +202,40 @@ REST_KNOX = {
 
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
+
+SITE_ID = 1
+
+# if ENVIRONMENT == 'production' or POSTGRES_LOCALLY == False:
+#     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+# else:
+#     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+
+EMAIL_HOST = "smtp.gmail.com"                   
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')              # your email address
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD') 
+EMAIL_USE_TLS = False                               # False
+EMAIL_PORT = "587"    
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+DEFAULT_FROM_EMAIL = f"Moneysaver <{os.getenv('EMAIL_HOST_USER')}>"
+ACCOUNT_EMAIL_SUBJECT_PREFIX = ''
+
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"
+
+# <EMAIL_CONFIRM_REDIRECT_BASE_URL>/<key>
+# <PASSWORD_RESET_CONFIRM_REDIRECT_BASE_URL>/<uidb64>/<token>/
+if ENVIRONMENT == 'development' or POSTGRES_LOCALLY is True:
+    EMAIL_CONFIRM_REDIRECT_BASE_URL = \
+    "http://localhost:3000/verify-email/"
+    
+    PASSWORD_RESET_CONFIRM_REDIRECT_BASE_URL = \
+    "http://localhost:3000/password-reset/confirm/"
+else:
+    EMAIL_CONFIRM_REDIRECT_BASE_URL = \
+    BASE_FRONTEND_URL + "/verify-email/"
+
+    PASSWORD_RESET_CONFIRM_REDIRECT_BASE_URL = \
+    BASE_FRONTEND_URL + "/password-reset/confirm/"

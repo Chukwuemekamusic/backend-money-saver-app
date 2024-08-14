@@ -2,7 +2,8 @@ from django.urls import path
 from .views import (
     UserCreateView, UserSavingPlanListView, WeeklyAmountUpdateView,
     LoginAPI, UserSavingPlanDetailView, SavingPlanCreateView, GetUserView,
-    LogoutUserView, GoogleLoginView)
+    LogoutUserView, GoogleLoginView, UserRegisterView, ActivateUserApiView)
+from dj_rest_auth.registration.views import RegisterView, LoginView, VerifyEmailView # LogoutView, UserDetailView
 
 
 urlpatterns = [
@@ -21,4 +22,12 @@ urlpatterns = [
     # Google OAuth2
     path('user/login/google/', GoogleLoginView.as_view(), name='google-login'),
     path('user/login/google/callback/', GoogleLoginView.as_view(), name='google-callback'),
+    # Allauth
+    path("user/register-auth/", UserRegisterView.as_view(), name="rest-register"),
+    path("user/login-auth/", LoginView.as_view(), name="rest-login"),
+#     path("user/logout-auth/", LogoutView.as_view(), name="rest-logout"),
+#     path('user/', UserDetailView.as_view(), name='rest-user-detail'),
+    # End Allauth
+    path('user/activate/<uidb64>/<token>/', ActivateUserApiView.as_view(), name='activate-user'),
+    
 ]

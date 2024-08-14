@@ -1,5 +1,5 @@
 # from django.shortcuts import render
-from django.http import Http404
+from django.http import Http404, HttpResponseRedirect
 from django.db.models import Max
 from django.shortcuts import redirect
 from django.conf import settings
@@ -32,6 +32,25 @@ from .utils import get_id_token, get_id_token_alt
 from .services import get_user_data
 from .utils import authentication_or_create_user
 
+# signup
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.template.loader import render_to_string
+from django.core.mail import send_mail
+from django.contrib.auth.tokens import default_token_generator
+from django.db import transaction
+import logging
+from .utils import Util
+
+# from django.contrib.sites.shortcuts import get_current_site
+# 
+logger = logging.getLogger(__name__)
+
+def email_confirm_redirect(request, key):
+    return HttpResponseRedirect(settings.EMAIL_CONFIRM_REDIRECT_BASE_URL + key + '/')
+
+def password_reset_confirm_redirect(request, uidb64, token):
+    return HttpResponseRedirect(settings.PASSWORD_RESET_CONFIRM_REDIRECT_BASE_URL + uidb64 + '/' + token + '/')
 
 # TODO: Google OAuth2
 class GoogleLoginView(APIView):
@@ -82,9 +101,71 @@ class UserCreateView(CreateAPIView):
     serializer_class = CustomUserSerializer
     permission_classes = [AllowAny]
 
+
+# a new view that handles registers but ensures that email validation is done
+class UserRegisterView(CreateAPIView):
+    serializer_class = CustomUserSerializer
+    permission_classes = [AllowAny]
+    
+    def perform_create(self, serializer):
+        user = serializer.save()
+        user.is_email_verified = False
+        user.is_active = False
+        user.save()
+        self.send_email_confirmation(user)
+    
+    def send_email_confirmation(self, user):
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        # current_site = get_current_site(request)
+        # verification_link = f"{current_site.domain}/verify-email/{uid}/{token}/"
+        verification_link = f"{settings.EMAIL_CONFIRM_REDIRECT_BASE_URL}{uid}/{token}/"
+
+        subject = "Verify your email address"
+        data = {
+            'email_subject': subject,
+            'email_body': verification_link,
+            'to_email': user.email
+        }
+        
+        try:
+            Util.send_email(data)
+        except Exception as e:
+            # Log the error or handle it as needed
+            logger.error(f"Error sending email: {e}")
+            # Optionally, you could raise an exception or return a response indicating failure
+    
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        return Response({"message": "Registration successful. Please check your email to verify your account."}, status=response.status_code)
+
+class ActivateUserApiView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, uidb64, token):
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = CustomUser.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+            user = None
+
+        if user is not None and default_token_generator.check_token(user, token):
+            user.is_active = True  # Activate the user account
+            user.save()
+            login(request, user)  # log in the user
+            
+            # create or retrieve the token
+            _, token = AuthToken.objects.create(user)
+            return Response({
+                "message": "Email verified successfully.",
+                "user": CustomUserSerializer(user).data,
+                "token": token
+            })
+        else:
+            return Response({"error": "Activation link is invalid!"}, status=status.HTTP_400_BAD_REQUEST)
+
+
 # not used
-
-
 class UserLoginView(KnoxLoginView):
     permission_classes = (AllowAny,)
     authentication_classes = (TokenAuthentication,)
@@ -95,6 +176,8 @@ class UserLoginView(KnoxLoginView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
+        if not user.is_email_verified:
+            return Response({"error": "Email not verified."}, status=status.HTTP_403_FORBIDDEN)
         login(request, user)
         return super(UserLoginView, self).post(request, format=None)
 

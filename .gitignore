@@ -5,3 +5,5 @@ __pycache__/
 
 env/
 client_secret.json
+
+altview.py

@@ -5,6 +5,7 @@ from django.contrib.auth.models import AbstractUser
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True, blank=False)
     username = models.CharField(max_length=150, unique=True)  # Ensure username is unique
+    is_email_verified = models.BooleanField(default=False)
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']  # Add username to required fields
@@ -12,7 +13,7 @@ class CustomUser(AbstractUser):
         ('email', 'Email'),
         ('google', 'Google'),
     )
-    registration_method = models.CharField(max_length=10, choices=REGISTRATION_CHOICES, default='google')
+    registration_method = models.CharField(max_length=10, choices=REGISTRATION_CHOICES, default='email')
 
 
     def __str__(self) -> str:

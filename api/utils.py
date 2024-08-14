@@ -1,3 +1,5 @@
+from django.core.mail import EmailMessage
+import threading
 # from google_auth_oauthlib.flow import Flow
 from oauth2client import client
 # import os
@@ -12,7 +14,19 @@ from django.db import transaction
 import logging
 # dotenv.load_dotenv()
 
+class EmailThread(threading.Thread):
+    def __init__(self, email):
+        self.email = email
+        threading.Thread.__init__(self)
 
+    def run(self):
+        self.email.send()
+
+class Util:
+    @staticmethod
+    def send_email(data):
+        email = EmailMessage(data['email_subject'], data['email_body'], to=[data['to_email']])
+        EmailThread(email).start()
 
 def get_id_token2(code):
     flow = client.OAuth2WebServerFlow(
