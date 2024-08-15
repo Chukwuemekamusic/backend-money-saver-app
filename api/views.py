@@ -82,20 +82,7 @@ class GoogleLoginView(APIView):
             return Response({"message": "Google login failed"})
 
 
-# class GoogleLoginView2(APIView):
 
-#     def get(self, request, *args, **kwargs):
-#         auth_serializer = AuthSerializer(data=request.GET)
-#         auth_serializer.is_valid(raise_exception=True)
-        
-#         validated_data = auth_serializer.validated_data
-#         user_data = get_user_data(validated_data)
-        
-#         user = CustomUser.objects.get(email=user_data['email'])
-#         login(request, user)
-#         print(user)
-
-#         return redirect(settings.BASE_APP_URL)
 
 class UserCreateView(CreateAPIView):
     serializer_class = CustomUserSerializer
@@ -109,10 +96,10 @@ class UserRegisterView(CreateAPIView):
     
     def perform_create(self, serializer):
         user = serializer.save()
-        user.is_email_verified = False
         user.is_active = False
         user.save()
         self.send_email_confirmation(user)
+        return Response({"message": "Registration successful. Please check your email to verify your account."}, status=status.HTTP_201_CREATED)
     
     def send_email_confirmation(self, user):
         token = default_token_generator.make_token(user)
@@ -135,9 +122,9 @@ class UserRegisterView(CreateAPIView):
             logger.error(f"Error sending email: {e}")
             # Optionally, you could raise an exception or return a response indicating failure
     
-    def create(self, request, *args, **kwargs):
-        response = super().create(request, *args, **kwargs)
-        return Response({"message": "Registration successful. Please check your email to verify your account."}, status=response.status_code)
+    # def create(self, request, *args, **kwargs):
+    #     response = super().create(request, *args, **kwargs)
+    #     return Response({"message": "Registration successful. Please check your email to verify your account."}, status=response.status_code)
 
 class ActivateUserApiView(APIView):
     permission_classes = [AllowAny]
@@ -176,7 +163,7 @@ class UserLoginView(KnoxLoginView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
-        if not user.is_email_verified:
+        if not user.is_active:
             return Response({"error": "Email not verified."}, status=status.HTTP_403_FORBIDDEN)
         login(request, user)
         return super(UserLoginView, self).post(request, format=None)
@@ -223,12 +210,6 @@ class UserSavingPlanListView(ListAPIView):
     serializer_class = SavingPlanSerializer
     permission_classes = [IsAuthenticated]
     
-    # def validate(self, data):
-    #     # Access the request object from the serializer's context
-    #     request = self.context.get('request')
-    #     data['user'] = request.user
-
-    #     return data
 
     def get_queryset(self):
         queryset = SavingPlan.objects.filter(user=self.request.user)
@@ -237,15 +218,6 @@ class UserSavingPlanListView(ListAPIView):
     def perform_create(self, serializer):
         # serializer.validated_data['user'] = self.request.user
         serializer.save()
-        # serializer.save(user=self.request.user)
-
-    #  def list(self, request, *args, **kwargs):
-    #     queryset = self.get_queryset()
-    #     serializer = self.get_serializer(queryset, many=True)
-    #     for saving_plan in serializer.data:
-    #         saved_amount = sum(amount['amount'] for amount in saving_plan['amount_list'] if amount['selected'])
-    #         saving_plan['saved_amount'] = saved_amount
-    #     return Response(serializer.data)
 
 
 class SavingPlanCreateView(CreateAPIView):
