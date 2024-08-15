@@ -213,8 +213,8 @@ SITE_ID = 1
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 EMAIL_HOST = "smtp.gmail.com"                   
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')              # your email address
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD') 
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', default='')              # your email address
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', default='') 
 EMAIL_USE_TLS = False                               # False
 EMAIL_PORT = "587"    
 EMAIL_USE_TLS = True
