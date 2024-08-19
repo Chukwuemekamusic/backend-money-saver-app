@@ -139,7 +139,7 @@ DATABASES = {
     # }
 }
 
-POSTGRES_LOCALLY = False
+POSTGRES_LOCALLY = True
 if ENVIRONMENT == 'production' or not POSTGRES_LOCALLY: 
     DATABASES['default'] = dj_database_url.parse(os.getenv('DATABASE_URL'))
 
@@ -213,9 +213,9 @@ SITE_ID = 1
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
 EMAIL_HOST = "smtp.gmail.com"                   
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', default='')              # your email address
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', default='')  
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', default='') 
-EMAIL_USE_TLS = False                               # False
+EMAIL_USE_TLS = False                             
 EMAIL_PORT = "587"    
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False

@@ -18,7 +18,6 @@ from rest_framework.response import Response
 
 from .models import WeeklyAmount, CustomUser, SavingPlan
 
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import login
 from django.utils import timezone
 
@@ -28,19 +27,16 @@ from knox.auth import TokenAuthentication
 from knox.models import AuthToken
 
 from rest_framework.exceptions import PermissionDenied
-from .utils import get_id_token, get_id_token_alt
-from .services import get_user_data
-from .utils import authentication_or_create_user
+from .utils import Util
+
 
 # signup
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
-from django.template.loader import render_to_string
-from django.core.mail import send_mail
 from django.contrib.auth.tokens import default_token_generator
 from django.db import transaction
 import logging
-from .utils import Util
+
 
 # from django.contrib.sites.shortcuts import get_current_site
 # 
@@ -57,9 +53,7 @@ class GoogleLoginView(APIView):
     def post(self, request):
         if 'code' in request.data:
             code = request.data['code']
-            # id_token = get_id_token2(code)
-            id_token = get_id_token_alt(code)
-            print('id_token', id_token)
+            id_token = Util.get_id_token_alt(code)
             if id_token is None:
                 return Response({"error": "Failed to retrieve ID token"}, status=status.HTTP_400_BAD_REQUEST)
             
@@ -68,12 +62,10 @@ class GoogleLoginView(APIView):
                 return Response({"error": "Email not found in ID token"}, status=status.HTTP_400_BAD_REQUEST)
             first_name = id_token.get('given_name', '')
             last_name = id_token.get('family_name', '')
-            user = authentication_or_create_user(user_email, first_name, last_name)
+            user = Util.authentication_or_create_user(user_email, first_name, last_name)
             user_data = CustomUserSerializer(user).data  # Serialize the user object
             _, token = AuthToken.objects.create(user)
-            print('user_data', user_data)
-            print('user', user)
-            print('token', token)
+            # print('user_data', user_data)
             return Response({
                 "user": user_data,
                 "token": token
@@ -107,11 +99,11 @@ class UserRegisterView(CreateAPIView):
         # current_site = get_current_site(request)
         # verification_link = f"{current_site.domain}/verify-email/{uid}/{token}/"
         verification_link = f"{settings.EMAIL_CONFIRM_REDIRECT_BASE_URL}{uid}/{token}/"
-
+        email_body = f"Welcome to the MoneySaver App! To complete your registration, please click the following link to verify your email address and activate your account: {verification_link}"
         subject = "Verify your email address"
         data = {
             'email_subject': subject,
-            'email_body': verification_link,
+            'email_body': email_body,
             'to_email': user.email
         }
         
@@ -120,11 +112,7 @@ class UserRegisterView(CreateAPIView):
         except Exception as e:
             # Log the error or handle it as needed
             logger.error(f"Error sending email: {e}")
-            # Optionally, you could raise an exception or return a response indicating failure
-    
-    # def create(self, request, *args, **kwargs):
-    #     response = super().create(request, *args, **kwargs)
-    #     return Response({"message": "Registration successful. Please check your email to verify your account."}, status=response.status_code)
+
 
 class ActivateUserApiView(APIView):
     permission_classes = [AllowAny]
@@ -193,10 +181,6 @@ class GetUserView(RetrieveAPIView):
         return self.request.user
 
 
-# class LogoutUserView(KnoxLogoutView):
-#     authentication_classes = [TokenAuthentication]
-#     permission_classes = [IsAuthenticated]
-
 class LogoutUserView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -204,7 +188,9 @@ class LogoutUserView(APIView):
         # Perform logout actions
         request.auth.delete()  # Delete the user's token
         return Response({"detail": "Successfully logged out."}, status=status.HTTP_200_OK)
-
+# class LogoutUserView(KnoxLogoutView):
+#     authentication_classes = [TokenAuthentication]
+#     permission_classes = [IsAuthenticated]
 
 class UserSavingPlanListView(ListAPIView):
     serializer_class = SavingPlanSerializer
